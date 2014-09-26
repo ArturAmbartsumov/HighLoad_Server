@@ -13,7 +13,7 @@
 
 
 int main() {
-    Server server(8080, 10);
+    Server server(8080, 16);
     //std::cout << "Hello world";
     std::thread main_thread(&Server::start, &server);
     //std::cout << "Hello world";

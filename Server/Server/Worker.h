@@ -18,7 +18,12 @@
 #include <unistd.h>
 #include <chrono>
 #include <thread>
+
 #include "ClientsQueue.h"
+#include "Request.h"
+#include "Response.h"
+#include "FileSystem.h"
+#include "Decoder.h"
 
 static std::recursive_mutex g_lockprint;
 

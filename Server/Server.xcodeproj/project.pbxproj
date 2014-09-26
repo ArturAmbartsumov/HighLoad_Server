@@ -11,6 +11,10 @@
 		757668D919D033A30063B3FB /* Server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 757668D719D033A30063B3FB /* Server.cpp */; };
 		757668DC19D045050063B3FB /* Worker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 757668DA19D045050063B3FB /* Worker.cpp */; };
 		758873EC19D2E25F00C93FA4 /* ClientsQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 758873EA19D2E25F00C93FA4 /* ClientsQueue.cpp */; };
+		75992B8519D56C5F004FCE8A /* Request.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 75992B8319D56C5F004FCE8A /* Request.cpp */; };
+		75992B8819D56CF1004FCE8A /* Response.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 75992B8619D56CF1004FCE8A /* Response.cpp */; };
+		75992B8B19D56E35004FCE8A /* FileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 75992B8919D56E35004FCE8A /* FileSystem.cpp */; };
+		75992B8E19D56F87004FCE8A /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 75992B8C19D56F87004FCE8A /* Decoder.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,6 +38,14 @@
 		757668DB19D045050063B3FB /* Worker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Worker.h; sourceTree = "<group>"; };
 		758873EA19D2E25F00C93FA4 /* ClientsQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ClientsQueue.cpp; sourceTree = "<group>"; };
 		758873EB19D2E25F00C93FA4 /* ClientsQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClientsQueue.h; sourceTree = "<group>"; };
+		75992B8319D56C5F004FCE8A /* Request.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Request.cpp; sourceTree = "<group>"; };
+		75992B8419D56C5F004FCE8A /* Request.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Request.h; sourceTree = "<group>"; };
+		75992B8619D56CF1004FCE8A /* Response.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Response.cpp; sourceTree = "<group>"; };
+		75992B8719D56CF1004FCE8A /* Response.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Response.h; sourceTree = "<group>"; };
+		75992B8919D56E35004FCE8A /* FileSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileSystem.cpp; sourceTree = "<group>"; };
+		75992B8A19D56E35004FCE8A /* FileSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileSystem.h; sourceTree = "<group>"; };
+		75992B8C19D56F87004FCE8A /* Decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decoder.cpp; sourceTree = "<group>"; };
+		75992B8D19D56F87004FCE8A /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +85,14 @@
 				757668DB19D045050063B3FB /* Worker.h */,
 				758873EA19D2E25F00C93FA4 /* ClientsQueue.cpp */,
 				758873EB19D2E25F00C93FA4 /* ClientsQueue.h */,
+				75992B8319D56C5F004FCE8A /* Request.cpp */,
+				75992B8419D56C5F004FCE8A /* Request.h */,
+				75992B8619D56CF1004FCE8A /* Response.cpp */,
+				75992B8719D56CF1004FCE8A /* Response.h */,
+				75992B8919D56E35004FCE8A /* FileSystem.cpp */,
+				75992B8A19D56E35004FCE8A /* FileSystem.h */,
+				75992B8C19D56F87004FCE8A /* Decoder.cpp */,
+				75992B8D19D56F87004FCE8A /* Decoder.h */,
 			);
 			path = Server;
 			sourceTree = "<group>";
@@ -134,6 +154,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				758873EC19D2E25F00C93FA4 /* ClientsQueue.cpp in Sources */,
+				75992B8519D56C5F004FCE8A /* Request.cpp in Sources */,
+				75992B8E19D56F87004FCE8A /* Decoder.cpp in Sources */,
+				75992B8819D56CF1004FCE8A /* Response.cpp in Sources */,
+				75992B8B19D56E35004FCE8A /* FileSystem.cpp in Sources */,
 				757668D919D033A30063B3FB /* Server.cpp in Sources */,
 				757668D119D02F8E0063B3FB /* main.cpp in Sources */,
 				757668DC19D045050063B3FB /* Worker.cpp in Sources */,

@@ -23,7 +23,7 @@ void Server::start() {
     {
         std::unique_lock<std::mutex> locker(g_lockprint);
         std::cout << "Listen socket: ";
-        int listenStatus = listen(socketFileDescriptor, 5);
+        int listenStatus = listen(socketFileDescriptor, 100);
         if(listenStatus == -1) {
             std::cout << "Listen Error" << std::endl;
             //возбудить эксепшн
