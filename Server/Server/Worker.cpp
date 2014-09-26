@@ -31,6 +31,24 @@ int Worker::popClient() {
 }
 
 void Worker::execute(int acceptedFileDescriptor) {
+    /*char buffer[1024];
+    
+    bool readingData = true;
+    while( readingData ) {
+        int bytesReaded = (int)recv(acceptedFileDescriptor, &buffer, 1024, 0);
+        if(bytesReaded == 0) {
+            std::cout << "Reading data error" << std::endl;
+            break;
+        }
+        readingData = memcmp(buffer + bytesReaded - 4, "\r\n\r\n", 4);
+    }
+    for(int i = 0; buffer[i] != '\0'; i++) {
+        //std::cout << buffer[i];
+    }
+    //std::cout << std::endl << std::endl;
+    
+    char msg[] = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\nConnection: close\r\n\r\nHello world!r\n\r\n";
+    send(acceptedFileDescriptor, msg, 1024 , 0);*/
     
     char buffer[1024];
     
@@ -38,7 +56,7 @@ void Worker::execute(int acceptedFileDescriptor) {
     while( readingData ) {
         int bytesReaded = (int)recv(acceptedFileDescriptor, &buffer, 1024, 0);
         if(bytesReaded == 0) {
-            std::cout << "Reading data error" << std::endl;
+            //std::cout << "Reading data error" << std::endl;
             break;
         }
         readingData = memcmp(buffer + bytesReaded - 4, "\r\n\r\n", 4);
@@ -130,16 +148,15 @@ void Worker::run(int workerIndex) {
             execute(popClient());
         }
         notified = false;
-            //std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
 
 void Worker::wakeUp() {
-    {
+    /*{
         std::unique_lock<std::recursive_mutex> locker(g_lockprint);
-        //std::cout << "Поток " << workerIndex << " просыпается" << std::endl;
-        //std::cout << "Размер очереди " << clientsNumber << std::endl << std::endl;
-    }
+        std::cout << "Поток " << workerIndex << " просыпается" << std::endl;
+        std::cout << "Размер очереди " << clientsNumber << std::endl << std::endl;
+    }*/
     notified = true;
     g_queuecheck.notify_all();
 }
