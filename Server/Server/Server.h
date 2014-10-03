@@ -24,6 +24,7 @@ class Server {
     
 private:
     int port;
+    int maxQueue;
     int socketFileDescriptor;
     std::vector<Worker> workers;
     int workersNumber;
@@ -32,12 +33,13 @@ private:
     void createSocket();
     sockaddr_in createSocketAdress(int port);
     void bindSocket(sockaddr_in socketAddres);
-    void pushClient(int acceptedFileDescriptor);
+    void startListen();
     void initWorkers();
+    void killWorkers();
     int getFreeWorker();
     
 public:
-    Server(int port, int workersNumber);
+    Server(int port, int workersNumber, int maxQueue);
     ~Server();
     void start();
 };

@@ -8,64 +8,37 @@
 
 #include "Server.h"
 
-Server::Server(int port, int workersNumber): workers(workersNumber) {
+Server::Server(int port, int workersNumber, int maxQueue): workers(workersNumber) {
     this->workersNumber = workersNumber;
+    this->maxQueue = maxQueue;
     createSocket();
     sockaddr_in socketAddres = createSocketAdress(port);
     bindSocket(socketAddres);
 }
 
 Server::~Server() {
-    
+    close(this->socketFileDescriptor);
 }
 
 void Server::start() {
-    {
-        std::unique_lock<std::mutex> locker(g_lockprint);
-        std::cout << "Listen socket: ";
-        int listenStatus = listen(socketFileDescriptor, 1000);
-        if(listenStatus == -1) {
-            std::cout << "Listen Error" << std::endl;
-            //возбудить эксепшн
-        }
+    signal(SIGPIPE, SIG_IGN);
     
-        std::cout << "Done" << std::endl<<std::endl;
-    }
+    startListen();
     
     initWorkers();
-    
+
     while(1) {
-        int acceptedFileDescriptor = accept(socketFileDescriptor, NULL, NULL);
-        {
-            //std::unique_lock<std::mutex> locker(g_lockprint);
-            if(acceptedFileDescriptor == -1) {
-                std::cout << "Accept connected client error" << std::endl;
-                //break;
-            }
-            //std::cout << std::endl << "Client connected : " << acceptedFileDescriptor << std::endl << std::endl;
-        }
+        int clientSocket = accept(socketFileDescriptor, NULL, NULL);
         
+        if(clientSocket == -1) {
+            std::unique_lock<std::mutex> locker(g_lockprint);
+            std::cout << "Accept connected client error" << std::endl;
+            break;
+        }
+
         int freeWorker = getFreeWorker();
-        workers[freeWorker].pushClient(acceptedFileDescriptor);
-        
-        /*char buffer[1024];
-        
-        bool readingData = true;
-        while( readingData ) {
-            int bytesReaded = (int)recv(acceptedFileDescriptor, &buffer, 1024, 0);
-            if(bytesReaded == 0) {
-                std::cout << "Reading data error" << std::endl;
-                break;
-            }
-            readingData = memcmp(buffer + bytesReaded - 4, "\r\n\r\n", 4);
-        }
-        for(int i = 0; buffer[i] != '\0'; i++) {
-            std::cout << buffer[i];
-        }
-        std::cout << std::endl << std::endl;
-        
-        char msg[] = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\nConnection: close\r\n\r\nHello world!r\n\r\n";
-        send(acceptedFileDescriptor, msg, 1024 , 0);*/
+        workers[freeWorker].pushClient(clientSocket);
+
     }
 }
 
@@ -77,7 +50,8 @@ void Server::createSocket() {
         std::cout << "Socket Initialization Failed" << std::endl;
         //возбудить эксепшн
     }
-    std::cout << "Done" << std::endl;
+    else
+        std::cout << "Done" << std::endl;
 }
 
 sockaddr_in Server::createSocketAdress(int port) {
@@ -96,11 +70,20 @@ void Server::bindSocket(sockaddr_in socketAddres) {
         std::cout << "Bind Error" << std::endl;
         //возбудить эксепшн
     }
-    std::cout << "Done" << std::endl;
+    else
+        std::cout << "Done" << std::endl;
 }
 
-void Server::pushClient(int acceptedFileDescriptor) {
-    
+void Server::startListen() {
+    std::unique_lock<std::mutex> locker(g_lockprint);
+    std::cout << "Listen socket: ";
+    int listenStatus = listen(socketFileDescriptor, maxQueue);
+    if(listenStatus == -1) {
+        std::cout << "Listen Error" << std::endl;
+        //возбудить эксепшн
+    }
+    else
+        std::cout << "Done" << std::endl;
 }
 
 void Server::initWorkers() {

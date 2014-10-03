@@ -23,7 +23,8 @@
 #include "Request.h"
 #include "Response.h"
 #include "FileSystem.h"
-#include "Decoder.h"
+#include "UrlParser.h"
+#include "File.h"
 
 static std::recursive_mutex g_lockprint;
 
@@ -34,9 +35,12 @@ private:
     ClientsQueue clients;
     unsigned long clientsNumber;
     int workerIndex;
+    bool stopThread;
+    FileSystem fs;
 
-    void execute(int acceptedFileDescriptor);
+    void execute(int clientSocket);
     int popClient();
+    Response buildResponse(Request &r);
     
 public:
     int testNumber;
@@ -44,10 +48,12 @@ public:
     std::condition_variable g_queuecheck;
     
     Worker();
+    ~Worker();
+    void shutDown();
     void run(int t);
     void wakeUp();
     unsigned long getClientsNumber();
-    void pushClient(int acceptedFileDescriptor);
+    void pushClient(int clientSocket);
 };
 
 #endif /* defined(__Server__Worker__) */

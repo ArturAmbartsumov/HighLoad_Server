@@ -9,35 +9,43 @@
 #include "Request.h"
 
 Request::Request(char* requestBuffer) {
-    requestMethod = "";
-    requestUrl = "";
+    method = "";
+    url = "";
     httpVersion = "";
     
     while(*requestBuffer != ' ')
-        requestMethod += *requestBuffer++;
+        method += *requestBuffer++;
     
     requestBuffer++;
     while(*requestBuffer != ' ')
-        requestUrl += *requestBuffer++;
+        url += *requestBuffer++;
+    url = urlDeleteParams( urlDecoder(url) );
     
     requestBuffer++;
     while(*requestBuffer != '\n')
         httpVersion += *requestBuffer++;
+
 }
 
-std::string Request::getRequestMethod() {
-    return requestMethod;
+std::string Request::getMethod() {
+    return method;
 }
-std::string Request::getRequestUrl() {
-    return requestUrl;
+
+std::string Request::getUrl() {
+    return url;
 }
+
+void Request::addIndex() {
+    url += "/index.html";
+}
+
 std::string Request::getHttpVersion() {
     return httpVersion;
 }
 
 void Request::print() {
-    //std::cout << std::endl << "requestMethod: "<< requestMethod
-   // << std::endl << "requestUrl: "<< requestUrl
-    //<< std::endl << "httpVersion: " << httpVersion
-    //<< std::endl;
+    std::cout << std::endl << "method: "<< method
+    << std::endl << "url: "<< url
+    << std::endl << "httpVersion: " << httpVersion
+    << std::endl;
 }

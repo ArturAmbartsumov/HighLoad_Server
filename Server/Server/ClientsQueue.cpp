@@ -28,5 +28,6 @@ int ClientsQueue::pop() {
 
 unsigned long ClientsQueue::getClientsNumber() {
     std::lock_guard<std::recursive_mutex> locker(_lock);
-    return clientsNumber;
+    //return clientsNumber;
+    return clients.size();
 }

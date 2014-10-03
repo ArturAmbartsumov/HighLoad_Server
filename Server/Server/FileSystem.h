@@ -13,9 +13,12 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <string>
 #include <cstring>
 #include <iostream>
+//#include <sys/fcntl.h>
+#include "File.h"
 
 class FileSystem {
     
@@ -23,18 +26,19 @@ public:
     FileSystem();
     FileSystem(const std::string & path);
     
-    bool fileExist(const std::string & path);
+    bool pathExist(const std::string &path);
     bool isDirectory(const std::string & path);
     bool isFile(const std::string & path);
-    unsigned getLength(const std::string & path);
+    unsigned getFileLength(const std::string &path);
     std::string getContentType(const std::string & path);
-    char * getFile(const std::string & path);
+    File getFile(const std::string &path);
+    void dropStat();
     
 private:
-    char DIRECTORY_ROOT[512];
+    char DIRECTORY_ROOT[FILENAME_MAX];
     struct stat st;
     
-    int initSt(const char *path);
+    int setStat(const char *path);
 };
 
 #endif /* defined(__Server__FileSystem__) */

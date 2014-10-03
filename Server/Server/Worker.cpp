@@ -6,22 +6,34 @@
 //  Copyright (c) 2014 Артур. All rights reserved.
 //
 
+
+
 #include "Worker.h"
 
 Worker::Worker() {
     clientsNumber = 0;
     notified = false;
-    //testNumber = rand();
+    stopThread = false;
+}
+
+Worker::~Worker() {
+    //shutDown();
+    //std::this_thread::sleep_for(std::chrono::seconds(5));
+}
+
+void Worker::shutDown() {
 }
 
 unsigned long Worker::getClientsNumber() {
-    return clientsNumber;
+    //return clientsNumber;
+    return clients.getClientsNumber();
 }
 
-void Worker::pushClient(int acceptedFileDescriptor) {
-    clients.push(acceptedFileDescriptor);
+void Worker::pushClient(int clientSocket) {
+    clients.push(clientSocket);
     clientsNumber = clients.getClientsNumber();
-    wakeUp();
+    //if (clientsNumber < 2)
+        wakeUp();
 }
 
 int Worker::popClient() {
@@ -30,124 +42,113 @@ int Worker::popClient() {
     return buff;
 }
 
-void Worker::execute(int acceptedFileDescriptor) {
-    /*char buffer[1024];
-    
-    bool readingData = true;
-    while( readingData ) {
-        int bytesReaded = (int)recv(acceptedFileDescriptor, &buffer, 1024, 0);
-        if(bytesReaded == 0) {
-            std::cout << "Reading data error" << std::endl;
-            break;
-        }
-        readingData = memcmp(buffer + bytesReaded - 4, "\r\n\r\n", 4);
-    }
-    for(int i = 0; buffer[i] != '\0'; i++) {
-        //std::cout << buffer[i];
-    }
-    //std::cout << std::endl << std::endl;
-    
-    char msg[] = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\nConnection: close\r\n\r\nHello world!r\n\r\n";
-    send(acceptedFileDescriptor, msg, 1024 , 0);*/
-    
+void Worker::execute(int clientSocket) {
+
     char buffer[1024];
-    
-    bool readingData = true;
-    while( readingData ) {
-        int bytesReaded = (int)recv(acceptedFileDescriptor, &buffer, 1024, 0);
+
+
+        int bytesReaded = (int)recv(clientSocket, &buffer, 1024, 0);
         if(bytesReaded == 0) {
-            //std::cout << "Reading data error" << std::endl;
-            break;
+            std::unique_lock<std::recursive_mutex> locker(g_lockprint);
+            std::cout << "Reading data error" << workerIndex << std::endl;
         }
-        readingData = memcmp(buffer + bytesReaded - 4, "\r\n\r\n", 4);
-    }
+    
     
     Request r(buffer);
-    r.print();
-    //std::cout << "\n\n";
+    Response resp = buildResponse(r);
     
-    Response resp;
-    char* buf = NULL;
-    FileSystem *fs = new FileSystem();
-    
-    std::string url =  urlDeleteParams( urlDecoder(r.getRequestUrl()) );
-    std::string method = r.getRequestMethod();
-    
-    if( !(method == "GET" || method == "HEAD") ) {
-        resp.setStatusCode(405);
-        resp.setContentLength(0);
-        resp.setConnection("close");
-        resp.setDate();
+    //Отправка заголовков
+    std::string respStr = resp.getResponse();
+    ssize_t s = send(clientSocket, respStr.c_str(), respStr.length(), 0);
+    if (s == -1 || errno == EPIPE) {
+        std::unique_lock<std::recursive_mutex> locker(g_lockprint);
+        std::cout << "EPIPE при отправке заголовков, errno =  " << errno << "\n";
+        close(clientSocket);
+        return;
     }
-    else {
-        if( !fs->fileExist(url)) {
-            //std::cout << "HEREEE";
+    
+    //Отправка данных, если они есть
+    if(r.getMethod() == "GET" && resp.getStatusCode() == "200 OK" ) {
+        File file = fs.getFile(r.getUrl());
+        off_t offset = 0;
+        off_t fileLength = file.fileLength;
+        int ret = sendfile(file.fileDesc, clientSocket, offset, &fileLength, NULL, 0);
+        if (ret == -1) {
+            if (errno == EAGAIN) {
+                if (fileLength == 0) {
+                    std::cout << "Didn't send anything. Return error with errno == EAGAIN" << "\n";
+                } else {
+                    std::cout << "We sent some bytes, but they we would block" << "\n";
+                }
+            } else if (errno == EPIPE) {
+                std::unique_lock<std::recursive_mutex> locker(g_lockprint);
+                std::cout << "EPIPE при отправке данных, errno =  " << errno << "\n";
+                file.closeFile();
+                close(clientSocket);
+                return;
+            } else std::cout << "Some other error " << errno << "\n";
+        }
+        file.closeFile();
+    }
+    close(clientSocket);
+}
+
+Response Worker::buildResponse(Request &r) {
+    Response resp;
+    //std::string url =  urlDeleteParams( urlDecoder(r.getUrl()) );
+    std::string method = r.getMethod();
+    if(method == "GET" || method == "HEAD") {
+        if(!fs.pathExist(r.getUrl())) {
             resp.setStatusCode(404);
             resp.setContentLength(0);
-            resp.setConnection("close");
-            resp.setDate();
         }
-        if(fs->isDirectory(url)) {
-            url += "/index.html";
-            if(!fs->fileExist(url)) {
-                resp.setStatusCode(403);
-                resp.setContentLength(0);
-                resp.setConnection("close");
-                resp.setDate();
+        else {
+            if (fs.isDirectory(r.getUrl())) {
+                r.addIndex();
+                if (!fs.pathExist(r.getUrl())) {
+                    resp.setStatusCode(403);
+                    resp.setContentLength(0);
+                }
+            }
+            if (fs.isFile(r.getUrl())) {
+                resp.setStatusCode(200);
+                unsigned int fl = fs.getFileLength(r.getUrl());
+                resp.setContentLength(fl);
+                resp.setContentType(fs.getContentType(r.getUrl()));
             }
         }
-        
-        if(fs->isFile( url )) {
-            size_t fileSize = fs->getLength( url ) ;
-            resp.setDate();
-            resp.setStatusCode(200);
-            resp.setContentLength((int)fileSize);
-            resp.setContentType( fs->getContentType( url ) );
-            resp.setConnection("close");
-            
-        }
-        
     }
-    std::string respStr = resp.getResponse();
-    //std::cout << respStr;
-    send(acceptedFileDescriptor, respStr.c_str(), respStr.length(), 0);
-    if(method == "GET" && resp.getStatusCode() == "200 OK" ) {
-        size_t fileSize = fs->getLength( url ) ;
-        char *buf = fs->getFile( url );
-        if(buf != NULL)
-            send(acceptedFileDescriptor, buf, fileSize, 0);
+    else {
+        resp.setStatusCode(405);
+        resp.setContentLength(0);
     }
-    //std::cout << "\n\n";
-    
-    delete[] buf;
-    delete fs;
-    buf = NULL;
-    
-    //std::this_thread::sleep_for(std::chrono::seconds(5));
-    /*{
-        std::unique_lock<std::recursive_mutex> locker(g_lockprint);
-        std::cout << std::endl << " Клиент : " << acceptedFileDescriptor << " обслужился" << std::endl;
-        std::cout << "Размер очереди " << clientsNumber << std::endl;
-    }*/
-    close(acceptedFileDescriptor);
+    resp.setConnection("close");
+    resp.setDate();
+    return resp;
 }
 
 void Worker::run(int workerIndex) {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    signal(SIGPIPE, SIG_IGN);
     {
         std::unique_lock<std::recursive_mutex> locker(g_lockprint);
         std::cout << "Поток " << workerIndex << " запущен " << std::endl;
     }
     this->workerIndex = workerIndex;
+    
     while (1) {
-        std::unique_lock<std::mutex> locker(_lock);
-        while(!notified) { // от ложных пробуждений
-            g_queuecheck.wait(locker);
+        {
+            std::unique_lock<std::mutex> locker(_lock);
+            while(!notified) { // от ложных пробуждений
+                g_queuecheck.wait(locker);
+            }
+            notified = false;
         }
+        
         while (getClientsNumber()) {
             execute(popClient());
         }
-        notified = false;
+        
+        
     }
 }
 
@@ -157,6 +158,7 @@ void Worker::wakeUp() {
         std::cout << "Поток " << workerIndex << " просыпается" << std::endl;
         std::cout << "Размер очереди " << clientsNumber << std::endl << std::endl;
     }*/
+    std::unique_lock<std::mutex> locker(_lock);
     notified = true;
-    g_queuecheck.notify_all();
+    g_queuecheck.notify_one();
 }

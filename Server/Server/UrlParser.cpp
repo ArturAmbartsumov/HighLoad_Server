@@ -6,13 +6,10 @@
 //  Copyright (c) 2014 Артур. All rights reserved.
 //
 
-#include "Decoder.h"
+#include "UrlParser.h"
 
 bool checkEntry(int num, int left, int right) {
-    if ( num >= left && num <= right)
-        return true;
-    else
-        return false;
+    return num >= left ? num <= right : false;
 }
 
 int hexToDec(const std::string & code) {
@@ -53,7 +50,7 @@ std::string urlDeleteParams(const std::string & url) {
     std::string newUrl;
     size_t dots = url.find("..");
     if( dots != std::string::npos ){
-        newUrl = "kokokokokokokokokokokokokokodaaaaaaaa";
+        newUrl = "badUrl";
         return newUrl;
     }
     size_t sign = url.find("?");

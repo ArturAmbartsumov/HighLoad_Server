@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Артур. All rights reserved.
 //
 
-#ifndef __Server__Decoder__
-#define __Server__Decoder__
+#ifndef __Server__UrlParser__
+#define __Server__UrlParser__
 
 #include <iostream>
 #include <string>

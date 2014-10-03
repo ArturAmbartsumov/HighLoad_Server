@@ -10,15 +10,15 @@
 #include "Server.h"
 #include <thread>
 #include <mutex>
+#include <string>
+#include <signal.h>
 
 
 int main() {
-    Server server(8080, 16);
-    //std::cout << "Hello world";
+    signal(SIGPIPE, SIG_IGN);
+    Server server(8000, 3, 1000);
     std::thread main_thread(&Server::start, &server);
-    //std::cout << "Hello world";
     main_thread.join();
-    //std::cout << "Hello world";
     return 0;
 }
 

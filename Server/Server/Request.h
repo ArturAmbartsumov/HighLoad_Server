@@ -11,19 +11,21 @@
 
 #include <iostream>
 #include <string>
+#include "UrlParser.h"
 
 class Request {
     
 public:
     Request(char* requestBuffer);
-    std::string getRequestMethod();
-    std::string getRequestUrl();
+    std::string getMethod();
+    std::string getUrl();
+    void addIndex();
     std::string getHttpVersion();
     void print();
     
 private:
-    std::string requestMethod;
-    std::string requestUrl;
+    std::string method;
+    std::string url;
     std::string httpVersion;
 };
 
