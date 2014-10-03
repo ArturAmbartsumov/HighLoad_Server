@@ -25,7 +25,7 @@ class Server {
 private:
     int port;
     int maxQueue;
-    int socketFileDescriptor;
+    int socketServer;
     std::vector<Worker> workers;
     int workersNumber;
     std::mutex g_lockprint;

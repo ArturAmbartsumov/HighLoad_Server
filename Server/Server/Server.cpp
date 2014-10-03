@@ -17,7 +17,7 @@ Server::Server(int port, int workersNumber, int maxQueue): workers(workersNumber
 }
 
 Server::~Server() {
-    close(this->socketFileDescriptor);
+    close(this->socketServer);
 }
 
 void Server::start() {
@@ -28,7 +28,7 @@ void Server::start() {
     initWorkers();
 
     while(1) {
-        int clientSocket = accept(socketFileDescriptor, NULL, NULL);
+        int clientSocket = accept(socketServer, NULL, NULL);
         
         if(clientSocket == -1) {
             std::unique_lock<std::mutex> locker(g_lockprint);
@@ -44,9 +44,9 @@ void Server::start() {
 
 void Server::createSocket() {
     std::unique_lock<std::mutex> locker(g_lockprint);
-    socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
+    socketServer = socket(AF_INET, SOCK_STREAM, 0);
     std::cout << "Init socket : ";
-    if(socketFileDescriptor < 0) {
+    if(socketServer < 0) {
         std::cout << "Socket Initialization Failed" << std::endl;
         //возбудить эксепшн
     }
@@ -65,7 +65,7 @@ sockaddr_in Server::createSocketAdress(int port) {
 void Server::bindSocket(sockaddr_in socketAddres) {
     std::unique_lock<std::mutex> locker(g_lockprint);
     std::cout << "Bind socket : ";
-    int bindStatus = bind(socketFileDescriptor, (sockaddr *) &socketAddres, sizeof(sockaddr));
+    int bindStatus = bind(socketServer, (sockaddr *) &socketAddres, sizeof(sockaddr));
     if(bindStatus == -1) {
         std::cout << "Bind Error" << std::endl;
         //возбудить эксепшн
@@ -77,7 +77,7 @@ void Server::bindSocket(sockaddr_in socketAddres) {
 void Server::startListen() {
     std::unique_lock<std::mutex> locker(g_lockprint);
     std::cout << "Listen socket: ";
-    int listenStatus = listen(socketFileDescriptor, maxQueue);
+    int listenStatus = listen(socketServer, maxQueue);
     if(listenStatus == -1) {
         std::cout << "Listen Error" << std::endl;
         //возбудить эксепшн
