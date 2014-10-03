@@ -36,7 +36,7 @@ public:
     
 private:
     char DIRECTORY_ROOT[FILENAME_MAX];
-    struct stat st;
+    struct stat _stat;
     
     int setStat(const char *path);
 };

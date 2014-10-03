@@ -28,7 +28,7 @@ bool FileSystem::pathExist(const std::string &path) {
 bool FileSystem::isDirectory(const std::string & path) {
     const char* char_path = path.c_str();
     setStat(char_path);
-    bool temp = S_ISDIR(st.st_mode);
+    bool temp = S_ISDIR(_stat.st_mode);
     dropStat();
     return temp;
 }
@@ -36,7 +36,7 @@ bool FileSystem::isDirectory(const std::string & path) {
 bool FileSystem::isFile(const std::string & path) {
     const char* char_path = path.c_str();
     setStat(char_path);
-    bool temp = S_ISREG(st.st_mode);
+    bool temp = S_ISREG(_stat.st_mode);
     dropStat();
     return temp;
 }
@@ -44,7 +44,7 @@ bool FileSystem::isFile(const std::string & path) {
 unsigned FileSystem::getFileLength(const std::string &path) {
     const char* char_path = path.c_str();
     setStat(char_path);
-    unsigned int temp = (unsigned)st.st_size;
+    unsigned int temp = (unsigned) _stat.st_size;
     dropStat();
     return temp;
 }
@@ -72,7 +72,7 @@ int FileSystem::setStat(const char *path) {
     char *fileName = new char[FILENAME_MAX];
     strcpy(fileName, DIRECTORY_ROOT);
     strcat(fileName, path);
-    int status = stat(fileName, &st);
+    int status = stat(fileName, &_stat);
     if(status != 0) {
         dropStat();
     }
@@ -81,14 +81,14 @@ int FileSystem::setStat(const char *path) {
 }
 
 void FileSystem::dropStat() {
-    st.st_blksize = 0;
-    st.st_blocks = 0;
-    st.st_dev = 0;
-    st.st_gid = 0;
-    st.st_ino = 0;
-    st.st_mode = 0;
-    st.st_nlink = 0;
-    st.st_rdev = 0;
-    st.st_size = 0;
-    st.st_uid = 0;
+    _stat.st_blksize = 0;
+    _stat.st_blocks = 0;
+    _stat.st_dev = 0;
+    _stat.st_gid = 0;
+    _stat.st_ino = 0;
+    _stat.st_mode = 0;
+    _stat.st_nlink = 0;
+    _stat.st_rdev = 0;
+    _stat.st_size = 0;
+    _stat.st_uid = 0;
 }
